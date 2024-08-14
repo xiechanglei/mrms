@@ -70,12 +70,6 @@ mrms start --cfg /home/xie/code-work-space/js/mrms/mrms-server.json
 mrms start
 ```
 
-最后，命令是阻塞式的，所以你可以使用`nohup`命令来后台启动：
-
-```bash
-nohup mrms start >/dev/null 2>&1 &
-```
-
 如果需要停止服务，可以找到对应的进程，然后kill掉就可以了。当然我们也提供了一个停止服务的命令：
 
 ```bash
