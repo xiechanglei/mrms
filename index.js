@@ -94,3 +94,5 @@ program.command('show [options]')
     .option('--name <name>', 'project name')
     .option('--cfg <file>', 'config file', "mrms-server.json")
     .action((_, options) => showProject(options));
+
+program.parse()

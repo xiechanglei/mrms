@@ -1,6 +1,6 @@
 {
   "name": "mrms",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Micro Release Management System",
   "type": "module",
   "main": "index.js",
