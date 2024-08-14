@@ -37,7 +37,10 @@ export const startServer = async (options) => {
     const baseDir = path.dirname(fileURLToPath(import.meta.url))
     const startServerFile = baseDir + "/start-server.js"
     const command = `npx forever start -m 1 -s  ${startServerFile} ${configFile}`;
-    exec(command, (error, stdout, stderr) => {
+    const childProcess = exec(command, (error, stdout, stderr) => {
+        if(error){
+            console.log(childProcess)
+        }
     });
     console.log(chalk.green("start server success at port " + config.port))
 }

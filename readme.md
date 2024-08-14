@@ -197,3 +197,6 @@ mrms push --server 192.168.3.143 --port 11111 --dir . --project test-project --v
 - `mrms remove --name project_name --user rw:user_a` 服务端用来删除一个项目中的指定用户
 
 
+todo
+1. 重复启动失败之后关闭对应的forever
+

@@ -11,6 +11,7 @@ import {
 } from "./common.js";
 import path from 'path'
 import fs from 'fs'
+import kill from "tree-kill";
 
 const DEFAULT_MAX_VERSIONS = 10;
 
@@ -129,7 +130,7 @@ const processPull = (req, res, config) => {
     }
 }
 
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
     // 获取header种的auth
     const {action} = req.headers;
     // push ,push-file,push-over
@@ -140,15 +141,8 @@ http.createServer((req, res) => {
     } else {
         sendError(res, 401, 'invalid request')
     }
-}).listen(config.port, (err) => {
-    if (err) {
-        console.log("error:", err);
-    }else{
-        console.log("this server is running on port:", config.port)
-        console.log("this server is running on directory:", config.dir)
-        console.log("this server is running on block mode, you can use ' nohup mrms start >/dev/null 2>&1 &  ' to run it in background.")
-        console.log("***************************************")
-        console.log("you can use 'mrms stop' to stop the server. or use 'mrms stop --port your-port' to stop another server.")
-    }
-});
+}).listen(config.port);
 
+server.on('error', (e) => {
+    console.log("启动失败", e)
+});
