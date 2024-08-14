@@ -30,8 +30,8 @@ export const push = async (options) => {
         process.exit(1)
     }
     // 读取文件目录下的所有文件
-    let  allFiles = getAllFiles(config.dir, "");
-    if(config.include !== undefined && config.include.length > 0){
+    let allFiles = getAllFiles(config.dir, "");
+    if (config.include !== undefined && config.include.length > 0) {
         allFiles = allFiles.filter(f => {
             return config.include.findIndex(pla => {
                 // 如果是文件名称，直接精准匹配
@@ -51,7 +51,8 @@ export const push = async (options) => {
     for (let {filePath, location} of allFiles) {
         await uploadFile(config, filePath, location)
     }
-    console.log(chalk.green("push success! current version is:", config.version))
+    console.log(chalk.green("push success! current version is:", config.version));
+    process.exit(0);
 }
 
 const uploadFile = async (config, filePath, location) => {
@@ -70,10 +71,11 @@ const uploadFile = async (config, filePath, location) => {
     progressStream.on('progress', (progress) => {
         process.stdout.clearLine();
         process.stdout.cursorTo(0);
-        process.stdout.write(chalk.blue(progress.percentage.toFixed(2)));
-        process.stdout.write(chalk.blue("%"));
+        process.stdout.write(chalk.green("↗ "));
+        process.stdout.write(chalk.green(progress.percentage.toFixed(0)));
+        process.stdout.write(chalk.green("%"));
         process.stdout.write("\t");
-        process.stdout.write(chalk.black(location));
+        process.stdout.write(location);
         // process.stdout.write(chalk.black(` [${progress.transferred}/${progress.length}]`));
     });
 
@@ -96,9 +98,10 @@ const uploadFile = async (config, filePath, location) => {
     return new Promise((resolve, reject) => {
         request.on('response', (response) => {
             if (response.statusCode !== 200) {
-                console.log(chalk.red("upload file failed:", location))
+                process.stdout.write(chalk.bold(chalk.red(" ✕")));
                 reject()
             } else {
+                process.stdout.write(chalk.bold(chalk.green(" ✓")));
                 resolve()
             }
             process.stdout.write("\n")

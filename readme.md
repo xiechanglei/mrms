@@ -198,5 +198,4 @@ mrms push --server 192.168.3.143 --port 11111 --dir . --project test-project --v
 
 
 todo
-1. 重复启动失败之后关闭对应的forever
 

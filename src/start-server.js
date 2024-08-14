@@ -143,6 +143,8 @@ const server = http.createServer((req, res) => {
     }
 }).listen(config.port);
 
-server.on('error', (e) => {
-    console.log("启动失败", e)
+server.on('error', () => {
+    console.log("port already in use");
+    console.log(process.ppid)
+    kill(process.ppid, 'SIGKILL');
 });

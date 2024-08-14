@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import {readPullConfig} from "./common.js";
+import chalk from "chalk";
 
 export const pull = async (options) => {
     const config = readPullConfig(options);
@@ -32,7 +33,8 @@ export const pull = async (options) => {
 }
 
 const downloadFile = async (config, file) => {
-    console.log(`downloading ${file}...`)
+    process.stdout.write(chalk.green("↘ "));
+    process.stdout.write(file);
     const response = await fetch(`http://${config.server}:${config.port}`, {
         method: 'POST',
         headers: {
@@ -46,7 +48,8 @@ const downloadFile = async (config, file) => {
     });
     if (response.status !== 200) {
         const responseText = await response.text();
-        console.log(responseText)
+        process.stdout.write(chalk.bold(chalk.red(" ✕")));
+        process.stdout.write("\n");
         process.exit(1)
     }
     const buffer = await response.arrayBuffer();
@@ -58,6 +61,8 @@ const downloadFile = async (config, file) => {
         fs.mkdirSync(dirname, {recursive: true});
     }
     fs.writeFileSync(filePath, Buffer.from(buffer));
+    process.stdout.write(chalk.bold(chalk.green(" ✓")));
+    process.stdout.write("\n");
 }
 
 // 在当前目录下初始化服务

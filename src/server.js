@@ -37,11 +37,7 @@ export const startServer = async (options) => {
     const baseDir = path.dirname(fileURLToPath(import.meta.url))
     const startServerFile = baseDir + "/start-server.js"
     const command = `npx forever start -m 1 -s  ${startServerFile} ${configFile}`;
-    const childProcess = exec(command, (error, stdout, stderr) => {
-        if(error){
-            console.log(childProcess)
-        }
-    });
+    exec(command);
     console.log(chalk.green("start server success at port " + config.port))
 }
 
@@ -62,10 +58,8 @@ export const stopServer = (options) => {
     console.log("stop server on port:", port)
     find('port', port).then((list) => {
         list.forEach((p) => {
-            kill(p.pid, 'SIGKILL', () => {
-            });
-            kill(p.ppid, 'SIGKILL', () => {
-            });
+            kill(p.pid, 'SIGKILL');
+            kill(p.ppid, 'SIGKILL');
         })
     });
 
