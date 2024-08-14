@@ -120,7 +120,9 @@ const processPull = (req, res, config) => {
             if (!file.startsWith(projectDir)) {
                 throw new Error("invalid location");
             }
+            res.setHeader('Content-Length', fs.statSync(file).size);
             const stream = fs.createReadStream(file);
+            //写入content-length
             stream.pipe(res);
         } catch (e) {
             sendError(res, 500, `download failed: ${location_decode}`);

@@ -1,5 +1,5 @@
 import fs from "fs";
-import {getAllFiles, readPushConfig} from "./common.js";
+import {getAllFiles, readPushConfig,formatFileSize} from "./common.js";
 import path from "path";
 import chalk from "chalk";
 import progress from 'progress-stream';
@@ -76,7 +76,7 @@ const uploadFile = async (config, filePath, location) => {
         process.stdout.write(chalk.green("%"));
         process.stdout.write("\t");
         process.stdout.write(location);
-        // process.stdout.write(chalk.black(` [${progress.transferred}/${progress.length}]`));
+        process.stdout.write(chalk.yellow(` [${formatFileSize(progress.transferred)}/${formatFileSize(progress.length)}]`));
     });
 
     const request = http.request({

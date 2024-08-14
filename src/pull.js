@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
-import {readPullConfig} from "./common.js";
+import {formatFileSize, readPullConfig} from "./common.js";
 import chalk from "chalk";
+import http from "http";
 
 export const pull = async (options) => {
     const config = readPullConfig(options);
@@ -32,37 +33,70 @@ export const pull = async (options) => {
     }
 }
 
-const downloadFile = async (config, file) => {
-    process.stdout.write(chalk.green("↘ "));
-    process.stdout.write(file);
-    const response = await fetch(`http://${config.server}:${config.port}`, {
-        method: 'POST',
+const downloadFile = async (config, file_path) => {
+    // 格式化路径
+    const format_file_path = file_path.replace(/\\/g, "/");
+    // 创建文件夹
+    const file = path.resolve(config.dir, format_file_path);
+    const dirname = path.dirname(file);
+    if (!fs.existsSync(dirname)) {
+        fs.mkdirSync(dirname, {recursive: true});
+    }
+    // 创建文件流
+    const fileStream = fs.createWriteStream(file);
+    // 已经接收的字节数
+    let receivedBytes = 0;
+
+    // 文件的下载参数
+    const options = {
         headers: {
             'action': 'pull-file',
             'project': config.project,
             'version': config.version,
             'auth': config.auth,
             'profile': config.profile,
-            'location': encodeURIComponent(file)
+            'location': encodeURIComponent(file_path)
         }
-    });
-    if (response.status !== 200) {
-        const responseText = await response.text();
-        process.stdout.write(chalk.bold(chalk.red(" ✕")));
-        process.stdout.write("\n");
-        process.exit(1)
-    }
-    const buffer = await response.arrayBuffer();
-    // file 可能是windows路径，需要转换
-    file = file.replace(/\\/g, "/");
-    const filePath = path.resolve(config.dir, file);
-    const dirname = path.dirname(filePath);
-    if (!fs.existsSync(dirname)) {
-        fs.mkdirSync(dirname, {recursive: true});
-    }
-    fs.writeFileSync(filePath, Buffer.from(buffer));
-    process.stdout.write(chalk.bold(chalk.green(" ✓")));
-    process.stdout.write("\n");
+    };
+
+    process.stdout.write(chalk.green("↘ "));
+    process.stdout.write(chalk.green("0% "));
+    process.stdout.write(file_path);
+    // 下载文件
+
+    return new Promise((resolve, reject) => {
+        http.get(`http://${config.server}:${config.port}`, options, (response) => {
+            if (response.statusCode !== 200) {
+                process.stdout.write(chalk.bold(chalk.red(" ✕")));
+                process.stdout.write("\n");
+                process.exit(1)
+            }
+            const totalBytes = response.headers['content-length'];
+            process.stdout.write(chalk.yellow(` [${formatFileSize(receivedBytes)}/${formatFileSize(totalBytes)}] `));
+            response.on('data', (chunk) => {
+                receivedBytes += chunk.length;
+                process.stdout.clearLine();
+                process.stdout.cursorTo(0);
+                const progress = (receivedBytes / totalBytes * 100).toFixed(0);
+                process.stdout.write(chalk.green("↘ "));
+                process.stdout.write(chalk.green(`${progress}% `));
+                process.stdout.write(file_path);
+                process.stdout.write(chalk.yellow(` [${formatFileSize(receivedBytes)}/${formatFileSize(totalBytes)}] `));
+            });
+            response.on('end', () => {
+                process.stdout.write(chalk.bold(chalk.green(" ✓")));
+                process.stdout.write("\n");
+                fileStream.close();
+                resolve()
+            });
+            response.pipe(fileStream);
+        }).on('error', (error) => {
+            process.stdout.write(chalk.bold(chalk.red(" ✕")));
+            process.stdout.write("\n");
+            process.exit(1)
+            reject()
+        })
+    })
 }
 
 // 在当前目录下初始化服务
