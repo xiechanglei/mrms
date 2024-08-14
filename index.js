@@ -6,8 +6,6 @@ import {push, initPushClient} from "./src/push.js";
 import {pull, initPullClient} from "./src/pull.js";
 import {addProject, removeProject} from "./src/server-config.js";
 import {showProject} from "./src/show.js";
-import fs from "fs";
-import path from "path";
 
 program.name("mrms");
 program.description("A tool for publishing version");
@@ -96,6 +94,3 @@ program.command('show [options]')
     .option('--name <name>', 'project name')
     .option('--cfg <file>', 'config file', "mrms-server.json")
     .action((_, options) => showProject(options));
-
-program.parse()
-
