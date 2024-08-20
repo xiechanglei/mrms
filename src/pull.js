@@ -7,29 +7,34 @@ import http from "http";
 export const pull = async (options) => {
     const config = readPullConfig(options);
     //读取文件列表
-    const response = await fetch(`http://${config.server}:${config.port}`, {
-        method: 'POST',
-        headers: {
-            'action': 'pull-start',
-            'project': config.project,
-            'version': config.version,
-            'profile': config.profile,
-            'auth': config.auth
+    try{
+        const response = await fetch(`http://${config.server}:${config.port}`, {
+            method: 'POST',
+            headers: {
+                'action': 'pull-start',
+                'project': config.project,
+                'version': config.version,
+                'profile': config.profile,
+                'auth': config.auth
+            }
+        });
+        if (response.status !== 200) {
+            const responseText = await response.text();
+            console.log(responseText)
+            return
         }
-    });
-    if (response.status !== 200) {
-        const responseText = await response.text();
-        console.log(responseText)
-        return
-    }
-    //如果下载的文件夹不存在，创建文件夹
-    const dir = path.resolve(config.dir);
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, {recursive: true});
-    }
-    const files = await response.json();
-    for (let file of files) {
-        await downloadFile(config, file);
+        //如果下载的文件夹不存在，创建文件夹
+        const dir = path.resolve(config.dir);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, {recursive: true});
+        }
+        const files = await response.json();
+        for (let file of files) {
+            await downloadFile(config, file);
+        }
+    }catch (e){
+        console.log(chalk.red("err:", "connect server failed on server", config.server, "and port", config.port, e.message))
+        process.exit(1)
     }
 }
 

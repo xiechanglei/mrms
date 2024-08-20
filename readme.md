@@ -186,16 +186,17 @@ mrms push --server 192.168.3.143 --port 11111 --dir . --project test-project --v
 
 > 以上的流程，主要讲解操作原理，可以简化使用`mrms init --pull` 来创建一个默认的配置文件，然后使用`mrms pull`来启动服务。
 
-
 #### 6. 辅助命令
 
 - `mrms show` 服务端用来显示当前目录下的`mrms-server.json`中的配置的所有的项目,可以通过`--cfg` 来指定配置文件
-- `mrms show --name project_name` 服务端用来显示对应项目的一些信息，包括项目的用户，项目的版本，分支等信息 
+- `mrms show --name project_name` 服务端用来显示对应项目的一些信息，包括项目的用户，项目的版本，分支等信息
 - `mrms add --name project_name` 服务端用来添加一个名字叫做`project_namne`的项目
-- `mrms add --name project_name --user rw:user_a` 服务端给 `project_name`项目添加一个有用户，权限是`rw`，名称是`user_a`,权限分为`r` `w` `rw`,分别表示只读，只写，以及读写。当用户的参数值只有权限符的时候，比如`--name rw`,会自动生成一个随机的用户,更推荐使用这种方式去生成。
+- `mrms add --name project_name --user rw:user_a` 服务端给 `project_name`项目添加一个有用户，权限是`rw`，名称是`user_a`
+  ,权限分为`r` `w` `rw`,分别表示只读，只写，以及读写。当用户的参数值只有权限符的时候，比如`--name rw`
+  ,会自动生成一个随机的用户,更推荐使用这种方式去生成。
 - `mrms remove --name project_name` 服务端用来删除一个项目
 - `mrms remove --name project_name --user rw:user_a` 服务端用来删除一个项目中的指定用户
 
-
 todo
 
+1. 重写协议，使用http2 或者socket服务

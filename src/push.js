@@ -1,5 +1,5 @@
 import fs from "fs";
-import {getAllFiles, readPushConfig,formatFileSize} from "./common.js";
+import {getAllFiles, readPushConfig, formatFileSize} from "./common.js";
 import path from "path";
 import chalk from "chalk";
 import progress from 'progress-stream';
@@ -26,7 +26,7 @@ export const push = async (options) => {
             return
         }
     } catch (e) {
-        console.log(chalk.red("err:", "connect server failed on server", config.server, "and port", config.port))
+        console.log(chalk.red("err:", "connect server failed on server", config.server, "and port", config.port, e.message))
         process.exit(1)
     }
     // 读取文件目录下的所有文件
@@ -107,7 +107,6 @@ const uploadFile = async (config, filePath, location) => {
             process.stdout.write("\n")
         });
     })
-
 };
 
 // 在当前目录下初始化服务
