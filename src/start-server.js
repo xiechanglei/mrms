@@ -27,15 +27,16 @@ const processPush = (req, res, config) => {
         sendError(res, 401, 'you have no permission to write this project')
         return
     }
-    const projectDir = path.resolve(config.dir, project, version, profile);
+    const projectProfileDir = path.resolve(config.dir, project, version, profile);
+    const projectVersionDir = path.resolve(config.dir, project, version);
     if (action === "push-start") {
         //判断版本是否存在
-        if (fs.existsSync(projectDir)) {
+        if (fs.existsSync(projectProfileDir)) {
             //删除文件夹
-            fs.rmdirSync(projectDir, {recursive: true});
+            fs.rmdirSync(projectProfileDir, {recursive: true});
         }
         // 创建文件夹
-        fs.mkdirSync(projectDir, {recursive: true});
+        fs.mkdirSync(projectProfileDir, {recursive: true});
         // 留存版本
         let maxVersions = parseInt(config.maxVersions ?? DEFAULT_MAX_VERSIONS);
         // NaN
@@ -58,8 +59,8 @@ const processPush = (req, res, config) => {
         const location_decode = decodeURIComponent(location);
         try {
             //对location进行处理，保证文件路径在项目目录下
-            const file = path.resolve(projectDir, location_decode);
-            if (!file.startsWith(projectDir)) {
+            const file = path.resolve(projectProfileDir, location_decode);
+            if (!file.startsWith(projectProfileDir)) {
                 throw new Error("invalid location");
             }
             //创建文件
@@ -74,17 +75,25 @@ const processPush = (req, res, config) => {
                 sendSuccess(res)
             });
             req.on('error', () => {
-                fs.rmdirSync(projectDir, {recursive: true});
+                fs.rmdirSync(projectProfileDir, {recursive: true});
                 sendError(res, 500, `upload failed: ${location_decode}`);
             })
         } catch (e) {
-            fs.rmdirSync(projectDir, {recursive: true});
+            fs.rmdirSync(projectProfileDir, {recursive: true});
+            // 判断版本下如果没有分支文件夹的话，把版本文件夹也删除
+            if (fs.readdirSync(projectVersionDir).length === 0) {
+                fs.rmdirSync(projectVersionDir, {recursive: true});
+            }
             sendError(res, 500, `upload failed: ${location_decode}`);
         }
 
     } else if (action === "push-cancel") {
         // 取消上传，删除文件夹
-        fs.rmdirSync(projectDir, {recursive: true});
+        fs.rmdirSync(projectProfileDir, {recursive: true});
+        // 判断版本下如果没有分支文件夹的话，把版本文件夹也删除
+        if (fs.readdirSync(projectVersionDir).length === 0) {
+            fs.rmdirSync(projectVersionDir, {recursive: true});
+        }
         sendSuccess(res)
     } else {
         sendError(res, 401, 'invalid action')
